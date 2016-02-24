@@ -138,27 +138,41 @@ function vopros_editorial_vopros_question_activity_feed($question, &$feed) {
 
 /**
  * Implements hook_views_default_views_alter().
+ *
+ * Add a filter to allow filtering on editorial on questions and public
+ * questions views.
  */
 function vopros_editorial_views_default_views_alter(&$views) {
   $vocab = taxonomy_vocabulary_machine_name_load('vopros_editorial');
   $terms = taxonomy_term_load_multiple(FALSE, array('vid' => $vocab->vid));
-  /* Filter criterion: Fields: Editorial (vopros_editorial) - tid */
-  if (isset($views['vopros_question_list']) && !empty($terms)) {
-    $subject = $views['vopros_question_list']->display['default']->display_options['filters']['subject_catagory_tid'];
-    unset($views['vopros_question_list']->display['default']->display_options['filters']['subject_catagory_tid']);
-    $views['vopros_question_list']->display['default']->display_options['filters']['vopros_editorial_tid']['id'] = 'vopros_editorial_tid';
-    $views['vopros_question_list']->display['default']->display_options['filters']['vopros_editorial_tid']['table'] = 'field_data_vopros_editorial';
-    $views['vopros_question_list']->display['default']->display_options['filters']['vopros_editorial_tid']['field'] = 'vopros_editorial_tid';
-    $views['vopros_question_list']->display['default']->display_options['filters']['vopros_editorial_tid']['group'] = 0;
-    $views['vopros_question_list']->display['default']->display_options['filters']['vopros_editorial_tid']['exposed'] = TRUE;
-    $views['vopros_question_list']->display['default']->display_options['filters']['vopros_editorial_tid']['expose']['operator_id'] = 'vopros_editorial_tid_op';
-    $views['vopros_question_list']->display['default']->display_options['filters']['vopros_editorial_tid']['expose']['label'] = 'with the editorial';
-    $views['vopros_question_list']->display['default']->display_options['filters']['vopros_editorial_tid']['expose']['operator'] = 'vopros_editorial_tid_op';
-    $views['vopros_question_list']->display['default']->display_options['filters']['vopros_editorial_tid']['expose']['use_operator'] = FALSE;
-    $views['vopros_question_list']->display['default']->display_options['filters']['vopros_editorial_tid']['expose']['identifier'] = 'vopros_editorial_tid';
-    $views['vopros_question_list']->display['default']->display_options['filters']['vopros_editorial_tid']['expose']['remember'] = 1;
-    $views['vopros_question_list']->display['default']->display_options['filters']['vopros_editorial_tid']['expose']['multiple'] = FALSE;
-    $views['vopros_question_list']->display['default']->display_options['filters']['subject_catagory_tid'] = $subject;
+  if (!empty($terms)) {
+    $filter_views = array(
+      'vopros_question_list',
+      'vopros_question_published_list',
+    );
+
+    foreach ($filter_views as $view_name) {
+      if (isset($views[$view_name])) {
+        $filters = $views[$view_name]->display['default']->display_options['filters'];
+        $filters['vopros_editorial_tid'] = array(
+          'id' => 'vopros_editorial_tid',
+          'table' => 'field_data_vopros_editorial',
+          'field' => 'vopros_editorial_tid',
+          'group' => 0,
+          'exposed' => TRUE,
+          'expose' => array(
+            'operator_id' => 'vopros_editorial_tid_op',
+            'label' => 'with the editorial',
+            'operator' => 'vopros_editorial_tid_op',
+            'use_operator' => FALSE,
+            'identifier' => 'vopros_editorial_tid',
+            'remember' => 1,
+            'multiple' => FALSE,
+          ),
+        );
+        $views[$view_name]->display['default']->display_options['filters'] = $filters;
+      }
+    }
   }
 }
 
