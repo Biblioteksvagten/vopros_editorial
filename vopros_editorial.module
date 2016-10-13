@@ -16,22 +16,6 @@ function vopros_editorial_init() {
 }
 
 /**
- * Implements hook_enable().
- */
-function vopros_editorial_enable() {
-  // Create the question vopros_editorial vocabolary.
-  if (!taxonomy_vocabulary_machine_name_load('vopros_editorial')) {
-    $vocabulary = (object) array(
-      'name' => t('Editorial'),
-      'machine_name' => 'vopros_editorial',
-      'module' => 'vopros_editorial',
-    );
-    taxonomy_vocabulary_save($vocabulary);
-  }
-  vopros_editorial_configure_question();
-}
-
-/**
  * Configure editorial fields on vopros_question.
  */
 function vopros_editorial_configure_question() {
